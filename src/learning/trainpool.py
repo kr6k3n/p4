@@ -4,6 +4,9 @@ from .agent import Agent
 from typing import List
 
 import random as R
+import pickle
+import datetime
+import os
 
 class TrainPool:
 	def __init__(self, population_size: int, agent : type, name : str ="Unnamed") -> None:
@@ -32,8 +35,13 @@ class TrainPool:
 		#create copies of top 10 and mutate with high factor
 		R.shuffle(self.population)
 	
-	def save(self) -> None:
-		pass
+	def save(self, pool_solder_path : str) -> None:
+		pool_path = pool_solder_path + "/" + self.name
+		try:
+			os.mkdir(pool_path)
+		except FileExistsError:
+			pass
+		
 		
 
 	"""def next_gen(self) -> None:
@@ -52,3 +60,54 @@ class TrainPool:
 		print("adding new children")
 		self.population += fastmap(new_snake,
 								   range(new_snakes_amount), display_progress=True)"""
+
+
+def now_file_name() -> str:
+    now = datetime.datetime.now()
+    return f"{BASE_DIR}/account_data/{now.day}-{now.month}-{now.year} {now.hour}:{now.minute}:{now.second}"
+
+
+def store_accounts(accounts: List[Instagram_Account], latest_data=LATEST_DATA, now_data=now_file_name()) -> None:
+    """
+        Dumps account data into both "latest" file and current date file.
+    """
+    latest = open(latest_data, "wb")
+    now = open(now_data, "wb")
+
+    pickle.dump(accounts, latest)
+    pickle.dump(accounts, now)
+    latest.close()
+    now.close()
+
+
+def get_accounts(latest_data=LATEST_DATA) -> List[Instagram_Account]:
+    """
+        Gets account data from "latest" file.
+    """
+    latest = open(latest_data, "rb")
+    accounts = pickle.load(latest)
+    latest.close()
+    return accounts
+
+
+def add_accounts(accounts: List[Instagram_Account], lastest_data=LATEST_DATA):
+    new_accounts = None
+    try:
+        new_accounts = get_accounts()
+    except FileNotFoundError:
+        new_accounts = []
+    new_accounts.extend(accounts)
+    store_accounts(new_accounts)
+
+
+def display_accounts() -> None:
+    try:
+        accounts = get_accounts()
+    except FileNotFoundError:
+        print("Can't display accounts: no storage created yet : (")
+    account_table: List[List[Any]] = [
+    	["Username", "Password", "Tags", "Reddit Threads"]]
+    for account in accounts:
+        account_table.append([account.username, account.password, len(
+            account.tags), account.fetcher_description["Reddit"]])
+    print(tabulate(account_table, headers="firstrow"))
