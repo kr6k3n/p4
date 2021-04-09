@@ -71,13 +71,13 @@ class P4Simulator(Simulator):
       for l in range(6):
           for c in range(7):
               if c < 4 and self.horiz(player, l, c):
-                  return player
+                return player
               if l < 3 and self.vert(player, l, c):
-                  return player
+                return player
               if c < 4 and l < 3 and self.diag1(player, l, c):
                   return player
               if l < 3 and c > 2 and self.diag2(player, l, c):
-                  return player
+                return player
     return None
 
   def draw(self) -> bool:
