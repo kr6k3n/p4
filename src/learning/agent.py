@@ -1,28 +1,34 @@
 from .neural_net import Neural_Network
+from .simulator import Simulator
+from typing import List, Callable, Type, Optional
+
+
 
 class Agent:
   """
     Classe de base pour un agent 
   """
   name = "None"
+  NN: Optional[Neural_Network]
   def __init__(self,
+               SHAPE:   List[int],
+               activation_function : Callable,
+               sim :  Type[Simulator],
                init_NN: bool=True,
-               SHAPE:   List[int] = None,
-               id:      int = None,
-               sim :  Simulator=None):
+               id:      int = None):
     if init_NN:
-      self.NN: Neural_Network = Neural_Network(SHAPE)
+      self.NN = Neural_Network(SHAPE, activation_function)
     else:
-      self.NN: Neural_Network = None
+      self.NN = None
     if not id is None:
       self.id = id
     self.sim = sim
-    self.sim_instance = None
-    score : float = None
+    self.sim_instance : Optional[Simulator] = None
+    self.score : float = 0
 
   
   def get_action(self, input_vec) -> int:
-    nn_output = self.NN.eval(input_vec)
+    nn_output = self.NN.eval_forward(input_vec)
     return nn_output.index(max(nn_output))
 
   def act(self) -> bool:
@@ -33,8 +39,11 @@ class Agent:
   def play_against_other(self, other) -> None:
     #create shared simulator
     new_sim = self.sim()
-    other.sim, self.sim = new_sim, new_sim
+    other.sim_instance = new_sim
+    self.sim_instance  = new_sim
+
     # play all game turns
+    game_ended = False
     while not game_ended:
       game_ended = not self.act()
       if not game_ended:
@@ -43,3 +52,5 @@ class Agent:
     self.score += 1 if self.sim_instance.winner == "X" else (-1 if self.sim_instance.winner == "O" else 0.5)
     other.score += 1 if self.sim_instance.winner == "O" else (-1 if self.sim_instance.winner == "X" else 0.5)
 
+  def mutate(self, rate : float) -> None:
+    self.NN.mutate(rate)

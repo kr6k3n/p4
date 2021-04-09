@@ -1,9 +1,13 @@
-from typing import List
+from typing import List, Any
+from abc import abstractclassmethod, abstractproperty, ABC
 
-class Simulator:
-  def act(self, action) -> bool:
+class Simulator(ABC):
+  winner : Any
+  state : Any
+  @abstractclassmethod
+  def act(self, action) -> bool: # type: ignore
     """returns True if next turn can be played"""
     pass
-  @property
-  def serialized_state(self) -> List[int]:
+  @abstractproperty
+  def serialized_state(self) -> List[int]: # type: ignore
     pass

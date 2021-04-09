@@ -7,23 +7,26 @@ class Player(enum.Enum):
   O = "O"
   none = None
 
-class PowerSim(Simulator):
-  def __init___(self):
+class P4Simulator(Simulator):
+  def __init__(self):
     self.state : list = [[0]*7 for l in range(6)]
     self.turn  = "X"
     self.winner = None
 
   def __repr__(self):
+    representation = "  P4 Sim:\n"
     for l in range(5, -1, -1):
       for c in range(0, 7):
+        representation += " "
         if self.state[l][c] == 0:
-          print(' ', end=' | ')
+          representation += "  | "
         elif self.state[l][c] == 1:
-          print('O', end=' | ')
+          representation += "O | "
         else:
-          print('X', end=' | ')
-      print(" ")
-    print(" ")
+          representation += "X | "
+      representation += "\n"
+    representation += "\n"
+    return representation
 
   @property
   def next_turn(self) -> str:

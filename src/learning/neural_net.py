@@ -1,5 +1,4 @@
-from typing import List
-from math import exp
+from typing import Callable, List
 
 from .make_stuff_go_faster import r_number
 from random import random, randint, choice
@@ -13,9 +12,9 @@ def ReLu(x : float) -> float:
 	return 0
 
 class Neural_Network:
-	def __init__(self, shape: List[int], activation_function : callable) -> None:
+	def __init__(self, shape: List[int], activation_function : Callable) -> None:
 		self.shape = shape
-		self.activation_function = ReLu
+		self.activation_function = activation_function
 		self.layer_connections: List[Connection] = []
 		for i in range(len(shape[:-1])):
 			left_side, right_side = shape[i], shape[i+1] 
@@ -23,7 +22,7 @@ class Neural_Network:
 			connection.random_init()
 			self.layer_connections.append(connection)
 
-	def eval_forward(self, input_vec)-> List[int]:
+	def eval_forward(self, input_vec : List[float])-> List[float]:
 		result = input_vec
 		for i in range(len(self.shape)-1):
 			result = self.layer_connections[i].eval_forward(result, activation_function=self.activation_function)
@@ -31,4 +30,8 @@ class Neural_Network:
 
 	def __repr__(self):
 		return "Neural net:" + str(self.shape)
+
+	def mutate(self, rate : float):
+		for layer_conn in self.layer_connections:
+			layer_conn.mutate(rate)
 	

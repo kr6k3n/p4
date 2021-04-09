@@ -1,6 +1,7 @@
-from learning.agent import Agent
+from src.learning.neural_net import ReLu
+from .learning.agent import Agent
 
-from p4sim import PowerSim
+from .p4_simulator import P4Simulator
 
 input_size = 7*6
 
@@ -14,13 +15,13 @@ SHAPE = [input_size,
          7]
 
 
-class P4player(Agent):
+class P4Agent(Agent):
   """
     Joueur de puissance 4
   """
   name = "Power 4 player"
-  def __init__(self, id : int = None) -> None:
-    super().__init__(init_NN=True, SHAPE=SHAPE, id=id, sim=PowerSim)
+  def __init__(self, id: int =None):
+    super().__init__(init_NN=True, SHAPE=SHAPE, activation_function=ReLu, id=id, sim=P4Simulator)
 
   def __str__(self):
     return self.__repr__()

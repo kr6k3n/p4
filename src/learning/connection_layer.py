@@ -20,7 +20,7 @@ class Connection:
 		for _ in range(self.left_side):
 			self.biases.append(r_number())
 
-	def eval_forward(self, input_vec : List[int], activation_function: Callable) ->  List[float]:
+	def eval_forward(self, input_vec : List[float], activation_function: Callable) ->  List[float]:
 		result = []
 		for neuron_weights in self.weights:
 			n = sum(neuron_weights[i] * input_vec[i] + self.biases[i] for i in range(self.right_side))
