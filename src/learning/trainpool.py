@@ -24,7 +24,7 @@ class TrainPool:
 	def __init__(self, population_size: int, agent : Type[Agent], name : str ="Unnamed") -> None:
 		self.population_size: int= population_size
 		self.name : str = name
-		print("Creating", self.name, "generation")
+		print("\n\nCreating", self.name, "generation")
 		print(f"Creating initial {agent.name} population...")
 		self.population: List[Agent] = fastmap(new_agent, list(agent for _ in range(population_size)) ,display_progress=True)
 		self.epochs : int = 0
@@ -39,7 +39,6 @@ class TrainPool:
 				p1.play_against_other(p2)
 
 	def display_stats(self):
-		number_of_matches = (self.population_size**2 - self.population_size)/2
 		print("best Agents: ")
 		for i in range(10):
 			print(i+1, ".", 
@@ -48,7 +47,9 @@ class TrainPool:
 		self.epochs += 1
 
 	def epoch(self) -> None:
-		print(f"{self.name}: epoch:{self.epochs+1}")
+		for i in range(self.population_size):
+			self.population[i].reset()
+		print(f"\n\n{self.name}: epoch {self.epochs+1}")
 		self.compete()
 		self.population.sort(key= lambda ag: ag.score, reverse=True)
 		self.display_stats()

@@ -26,6 +26,8 @@ class Agent:
     self.sim_instance : Optional[Simulator] = None
     self.score : float = 0
 
+  def reset(self):
+    self.score = 0
   
   def get_action(self, input_vec) -> int:
     nn_output = self.NN.eval_forward(input_vec)
