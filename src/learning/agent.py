@@ -54,16 +54,13 @@ class Agent:
       if debug_game:
         (print("\033[A\033[A") for _ in range(8))
         print(self.sim_instance)
-        time.sleep(1)
+        if not game_ended: time.sleep(0.5)
       if not game_ended:
         game_ended = other.act()
         if debug_game: 
           (print("\033[A\033[A") for _ in range(8))
           print(self.sim_instance)
-          time.sleep(1)
-    if debug_game: 
-      (print("\033[A\033[A") for _ in range(8))
-      print(self.sim_instance)
+          if not game_ended: time.sleep(0.5)
     #assign score ==> should be separate
     self.score += 1 if self.sim_instance.winner == "X" else (-1 if self.sim_instance.winner == "O" else 0.5)
     other.score += 1 if self.sim_instance.winner == "O" else (-1 if self.sim_instance.winner == "X" else 0.5)

@@ -8,8 +8,10 @@ input_size = 7*6
 SHAPE = [input_size,
          input_size//2,
          input_size//2,
-         input_size//4,
-         input_size//4,
+         input_size//2,
+         input_size//2,
+         input_size//3,
+         input_size//3,
          7]
 
 

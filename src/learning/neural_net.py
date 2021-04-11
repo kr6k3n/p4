@@ -1,10 +1,8 @@
 from typing import Callable, List
 
-from .make_stuff_go_faster import r_number
-from random import random, randint, choice
-
-
 from .connection_layer import Connection
+
+
 
 
 class Neural_Network:
@@ -27,7 +25,6 @@ class Neural_Network:
 	def __repr__(self):
 		return "Neural net:" + str(self.shape)
 
-	def mutate(self, rate : float):
-		for layer_conn in self.layer_connections:
-			layer_conn.mutate(rate)
+	def mutate(self, rate : float) -> None:
+		map(lambda l: l.mutate(rate), self.layer_connections)
 	

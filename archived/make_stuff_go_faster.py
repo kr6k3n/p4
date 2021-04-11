@@ -19,9 +19,6 @@ def close_pool():
 
 
 
-def r_number() -> float: 
-	value = random()
-	return -value if bool(getrandbits(1)) else value
 
 
 def fastmap(function, iterable, display_progress=False, progress_message="") -> list:

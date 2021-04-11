@@ -1,8 +1,13 @@
-from .make_stuff_go_faster import r_number #fastrand
-import random as R
 from typing import Callable, List
 import math
 
+
+from random import random, getrandbits
+
+
+def r_number() -> float:
+	value = random()
+	return -value if bool(getrandbits(1)) else value
 
 
 class Connection:
@@ -32,7 +37,7 @@ class Connection:
 		# fonction de loi uniforme vers loi normale ==> https://www.desmos.com/calculator/gx3e2uhdbr
 		squish_factor = (rate - 1) / math.log(0.5 * (1 - rate))
 		guaussian = lambda x : math.expm1((x-1)/squish_factor)
-		mutation = lambda : guaussian(R.random())
+		mutation = lambda : guaussian(random())
 		for i in range(self.right_side):
 			for j in range(self.left_side):
 				self.weights[i][j] *= mutation()

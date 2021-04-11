@@ -1,4 +1,5 @@
 from .agent import Agent
+from collections import deque
 
 from typing import List, Type
 
@@ -9,17 +10,6 @@ import pickle
 import tqdm
 import copy
 import os
-
-def new_agent(agent_class) -> Agent:
-	return agent_class()
-
-def compete_pairs(d):
-	population, delta = d[0], d[1]
-	for i in range(len(population)//2):
-		p1 = population[i]
-		p2 = population[(i+delta) % len(population)]
-		p1.play_against_other(p2)
-		p2.play_against_other(p1)
 
 
 class TrainPool:
@@ -35,7 +25,7 @@ class TrainPool:
 		self.population_size: int= population_size
 		print("\n\nCreating", self.name, "generation")
 		print(f"Creating initial {agent.name} population...")
-		self.population: List[Agent] = list(map(new_agent, list(agent for _ in range(population_size))))
+		self.population: List[Agent] = [agent() for _ in range(self.population_size)]
 		self.epochs : int = 0
 	
 	def display_stats(self, debugging=False):
@@ -49,10 +39,17 @@ class TrainPool:
 
 	def compete(self, debug=False) -> None:
 		# add multiprocessing here later for sped
-		if debug: print("competing...")
-		gen = range(1, self.population_size//2)
-		if debug: gen = tqdm.tqdm(gen)
-		map(compete_pairs, list((self.population, delta) for delta in gen))
+		if debug:
+			print("competing...")
+		def compete_pairs(delta):
+			for i in range(len(self.population)//2):
+				p1 = self.population[i]
+				p2 = self.population[(i+delta) % len(self.population)]
+				p1.play_against_other(p2)
+				p2.play_against_other(p1)
+		
+		deque(map(compete_pairs, range(1, self.population_size//2)))
+		print(list(range(1, self.population_size//2)))
 		
 
 	def show_game_from_best(self) -> None:
@@ -65,7 +62,8 @@ class TrainPool:
 		p1.play_against_other(p2, debug_game=True)
 
 	def epoch(self, demo_rate=float('inf'), debug=False) -> None:
-		map(lambda a : a.reset(), self.population)
+		for i in range(len(self.population)):
+			self.population[i].reset()
 	
 		if debug: print(f"\n\n{self.name}: epoch {self.epochs+1}")
 	
