@@ -8,6 +8,6 @@ class Simulator(ABC):
   def act(self, action) -> bool: # type: ignore
     """returns True if next turn can be played"""
     pass
-  @abstractproperty
-  def serialized_state(self) -> List[int]: # type: ignore
+  @abstractclassmethod
+  def serialized_state(self, player_id) -> List[int]: # type: ignore
     pass

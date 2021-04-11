@@ -1,86 +1,124 @@
-from .make_stuff_go_faster import fastmap
 from .agent import Agent
 
-from typing import Callable, List, Type
+from typing import List, Type
 
 import random as R
+import statistics
 import datetime
 import pickle
 import tqdm
 import copy
 import os
 
-def new_agent(agent_class) -> Callable:
+def new_agent(agent_class) -> Agent:
 	return agent_class()
 
 def compete_pairs(d):
-	population, index_delta = d[0], d[1]
+	population, delta = d[0], d[1]
 	for i in range(len(population)//2):
 		p1 = population[i]
-		p2 = population[(i+index_delta) % index_delta]
+		p2 = population[(i+delta) % len(population)]
 		p1.play_against_other(p2)
+		p2.play_against_other(p1)
+
 
 class TrainPool:
-	def __init__(self, population_size: int, agent : Type[Agent], name : str ="Unnamed") -> None:
-		self.population_size: int= population_size
+	def __init__(self, population_size: int, agent : Type[Agent], name : str ="Unnamed", restore=False, pool_folder_path : str = None) -> None:
 		self.name : str = name
+		if restore:
+			try:
+				self.restore_from_disk(pool_folder_path)
+				return
+			except FileNotFoundError:
+				print("Could not restore", self.name, "Training Pool", ": file missing")
+
+		self.population_size: int= population_size
 		print("\n\nCreating", self.name, "generation")
 		print(f"Creating initial {agent.name} population...")
-		self.population: List[Agent] = fastmap(new_agent, list(agent for _ in range(population_size)) ,display_progress=True)
+		self.population: List[Agent] = list(map(new_agent, list(agent for _ in range(population_size))))
 		self.epochs : int = 0
 	
-	def compete(self) -> None:
+	def display_stats(self, debugging=False):
+		scores = list(p.score for p in self.population)
+		mean_score = statistics.mean(scores)
+		median_score = statistics.median(scores)
+		if debugging:
+			print("mean_score", mean_score, "median_score", median_score)
+		else:
+			print(self.name, "pool, epoch #", self.epochs, "mean_score", mean_score, "median_score", median_score)
+
+	def compete(self, debug=False) -> None:
 		# add multiprocessing here later for sped
-		print("competing...")
-		for delta in tqdm.tqdm(range(1, self.population_size//2)):
-			for i in range(self.population_size//2):
-				p1 = self.population[i]
-				p2 = self.population[(i+delta) % self.population_size]
-				p1.play_against_other(p2)
+		if debug: print("competing...")
+		gen = range(1, self.population_size//2)
+		if debug: gen = tqdm.tqdm(gen)
+		map(compete_pairs, list((self.population, delta) for delta in gen))
+		
 
-	def display_stats(self):
-		print("best Agents: ")
-		for i in range(10):
-			print(i+1, ".", 
-						"score:", self.population[i].score, 
-						"ratio:", self.population[i].score / (self.population_size//2))
-		self.epochs += 1
+	def show_game_from_best(self) -> None:
+		print(self.name, "pool, epoch #", self.epochs)
+		print("good player vs good player")
+		p1, p2 = self.population[0], self.population[1]
+		p1.play_against_other(p2, debug_game=True)
+		print("good player vs bad player")
+		p1, p2 = self.population[0], self.population[-1]
+		p1.play_against_other(p2, debug_game=True)
 
-	def epoch(self) -> None:
-		for i in range(self.population_size):
-			self.population[i].reset()
-		print(f"\n\n{self.name}: epoch {self.epochs+1}")
-		self.compete()
+	def epoch(self, demo_rate=float('inf'), debug=False) -> None:
+		map(lambda a : a.reset(), self.population)
+	
+		if debug: print(f"\n\n{self.name}: epoch {self.epochs+1}")
+	
+		self.compete(debug=debug)
 		self.population.sort(key= lambda ag: ag.score, reverse=True)
-		self.display_stats()
+		self.display_stats(debugging=debug)
 
-		print("killing bottom 90% of population")
-		del self.population[self.population_size//10:] # Keep only top 10% agents
-		print("appky gamma rays to mutate population...")
-		for i in tqdm.tqdm(range(len(self.population))):
-			for _ in range(self.population_size//9):
+		if self.epochs % demo_rate == 0 and self.epochs != 0:
+			self.show_game_from_best()
+
+		if debug: print("killing bottom 90% of population")
+
+		del self.population[int(self.population_size*0.1):] # Keep only top 10% agents
+		
+		gen = range(len(self.population))
+		if debug: 
+			gen = tqdm.tqdm(gen)
+			print("apply gamma rays to mutate population...")
+
+		for i in gen:
+			for _ in range(9):
 				#create copies of top 10% and mutate with high factor ==> take higher risk
 				new_agent = copy.deepcopy(self.population[i])
 				new_agent.mutate(0.8)
 				self.population.append(new_agent)
 				#mutate top 10% with low factor ==> "fine tune"
 				self.population[i].mutate(0.95)
-		print("shuffling population")
+
+		if debug: print("shuffling population")
+
 		R.shuffle(self.population)
+		self.epochs += 1
 		
-	
-	def save(self, pool_solder_path : str) -> None:
-		pool_path = pool_solder_path + "/" + self.name
+	def save(self, pool_folder_path: str) -> None:
+		pool_path = pool_folder_path + "/" + self.name
 		try:
 			os.mkdir(pool_path)
 		except FileExistsError:
 			pass
 		now = datetime.datetime.now()
-		now_path =  f"{pool_path}/{now.day}-{now.month}-{now.year} {now.hour}:{now.minute}:{now.second}"
+		now_path =  f"{pool_path}/epoch {self.epochs} | {now.day}-{now.month}-{now.year} {now.hour}:{now.minute}"
 		latest_path = f"{pool_path}/latest"
 		now_file = open(now_path, "wb")
 		latest_file = open(latest_path, "wb")
 		pickle.dump(self, now_file)
 		pickle.dump(self, latest_file)
 		now_file.close()
+		latest_file.close()
+
+
+	def restore_from_disk(self, pool_folder_path):
+		pool_path = pool_folder_path + "/" + self.name
+		latest_path = f"{pool_path}/latest"
+		latest_file = open(latest_path, "rb")
+		self = pickle.load(latest_file)
 		latest_file.close()

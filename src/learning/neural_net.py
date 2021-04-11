@@ -6,10 +6,6 @@ from random import random, randint, choice
 
 from .connection_layer import Connection
 
-def ReLu(x : float) -> float:
-	if (x > 0):
-		return x
-	return 0
 
 class Neural_Network:
 	def __init__(self, shape: List[int], activation_function : Callable) -> None:

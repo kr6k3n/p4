@@ -1,3 +1,7 @@
 ✔ add mutate method on Neural net @started(21-04-09 15:43) @done(21-04-09 19:43)
-☐ add restore  TrainingPool function
-☐ add statistics method on TrainingPool
+✔ add pool saving @done(21-04-11 00:43)
+✔ add restore  TrainingPool function @done(21-04-11 00:53)
+✔ add statistics method on TrainingPool @done(21-04-09 23:37)
+☐ move scoring to Agent subclasses  
+☐ Add better scoring to disadvantage loss by stacking up
+☐ debug storage

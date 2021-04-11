@@ -1,28 +1,43 @@
-import fastrand
+#import fastrand
 from multiprocessing import Pool
+from random import getrandbits, random
+from typing import Optional
 from tqdm import tqdm
-from random import getrandbits
 
-PROCESSES = 6
+PROCESSES = 1
+
+POOL = None
+
+
+def open_pool():
+	global POOL
+	POOL = Pool(processes=PROCESSES)
+
+def close_pool():
+	global POOL
+	POOL.close()
+
 
 
 def r_number() -> float: 
-	value = fastrand.pcg32() / int(2**32)
+	value = random()
 	return -value if bool(getrandbits(1)) else value
 
 
 def fastmap(function, iterable, display_progress=False, progress_message="") -> list:
-	with Pool(processes=PROCESSES) as p:
-		max_ = len(iterable)
-		if display_progress:
-			with tqdm(total=max_) as pbar:
-				result = list()
-				for res in p.imap(func=function, iterable=iterable):
-					pbar.update()
-					result.append(res)
-				return result
-		else:
-			return list(p.map(func=function, iterable=iterable))
+	return list(map(function, iterable))
+	# global POOL
+	# max_ = len(iterable)
+	# if display_progress:
+	# 	with tqdm(total=max_) as pbar:
+	# 		result = list()
+	# 		for res in POOL.imap(func=function, iterable=iterable):
+	# 			pbar.update()
+	# 			result.append(res)
+	# 		return result
+	# else:
+	# 	return POOL.map(func=function, iterable=iterable)
+
 
 
 #test
