@@ -35,8 +35,11 @@ class Connection:
 
 	def mutate(self, rate : float) -> None:
 		# fonction de loi uniforme vers loi normale ==> https://www.desmos.com/calculator/gx3e2uhdbr
+		amplitude = 1.01
 		squish_factor = (rate - 1) / math.log(0.5 * (1 - rate))
-		guaussian = lambda x : math.expm1((x-1)/squish_factor)
+		def guaussian(x):
+			return -amplitude * (2 * math.expm1((x-1)/squish_factor) + 1)
+
 		mutation = lambda : guaussian(random())
 		for i in range(self.right_side):
 			for j in range(self.left_side):
