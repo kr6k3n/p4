@@ -1,8 +1,6 @@
 from typing import Callable, List
-
+#from numba import jitclass
 from .connection_layer import Connection
-
-
 
 
 class Neural_Network:
@@ -25,6 +23,8 @@ class Neural_Network:
 	def __repr__(self):
 		return "Neural net:" + str(self.shape)
 
+
 	def mutate(self, rate : float) -> None:
-		map(lambda l: l.mutate(rate), self.layer_connections)
+		for layer in self.layer_connections:
+			layer.mutate(rate)
 	

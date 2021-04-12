@@ -1,6 +1,7 @@
 from .agent import Agent
 from collections import deque
 
+
 from typing import List, Type
 
 import random as R
@@ -39,17 +40,17 @@ class TrainPool:
 
 	def compete(self, debug=False) -> None:
 		# add multiprocessing here later for sped
+		gen = range(1, self.population_size//2)
 		if debug:
 			print("competing...")
-		def compete_pairs(delta):
+			gen = tqdm.tqdm(gen)
+		for delta in gen:
 			for i in range(len(self.population)//2):
 				p1 = self.population[i]
 				p2 = self.population[(i+delta) % len(self.population)]
 				p1.play_against_other(p2)
 				p2.play_against_other(p1)
 		
-		deque(map(compete_pairs, range(1, self.population_size//2)))
-		print(list(range(1, self.population_size//2)))
 		
 
 	def show_game_from_best(self) -> None:
@@ -59,7 +60,7 @@ class TrainPool:
 		p1.play_against_other(p2, debug_game=True)
 		print("good player vs bad player")
 		p1, p2 = self.population[0], self.population[-1]
-		p1.play_against_other(p2, debug_game=True)
+		p2.play_against_other(p1, debug_game=True)
 
 	def epoch(self, demo_rate=float('inf'), debug=False) -> None:
 		for i in range(len(self.population)):
@@ -73,6 +74,9 @@ class TrainPool:
 
 		if self.epochs % demo_rate == 0 and self.epochs != 0:
 			self.show_game_from_best()
+			print('nn output sample')
+			p = self.population[0]
+			print(p.NN.eval_forward(p.sim_instance.serialized_state(p.player_id)))
 
 		if debug: print("killing bottom 90% of population")
 
@@ -80,8 +84,8 @@ class TrainPool:
 		
 		gen = range(len(self.population))
 		if debug: 
-			gen = tqdm.tqdm(gen)
 			print("apply gamma rays to mutate population...")
+			gen = tqdm.tqdm(gen)
 
 		for i in gen:
 			for _ in range(9):

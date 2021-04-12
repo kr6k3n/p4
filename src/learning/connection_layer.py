@@ -1,6 +1,7 @@
 from typing import Callable, List
 import math
 
+#from numba import jitclass
 
 from random import random, getrandbits
 
@@ -8,7 +9,6 @@ from random import random, getrandbits
 def r_number() -> float:
 	value = random()
 	return -value if bool(getrandbits(1)) else value
-
 
 class Connection:
 	def __init__(self, left_side: int, right_side: int):
@@ -21,9 +21,9 @@ class Connection:
 		for _ in range(self.right_side):
 			self.weights.append([])
 			for _ in range(self.left_side):
-				self.weights[-1].append(r_number())
+				self.weights[-1].append(1)
 		for _ in range(self.left_side):
-			self.biases.append(r_number())
+			self.biases.append(1)
 
 	def eval_forward(self, input_vec : List[float], activation_function: Callable) ->  List[float]:
 		def compute_neuron_value(neuron_weights):
@@ -32,7 +32,7 @@ class Connection:
 			return activation_function(n)
 	
 		return list(map(compute_neuron_value, self.weights))
-	
+
 	def mutate(self, rate : float) -> None:
 		# fonction de loi uniforme vers loi normale ==> https://www.desmos.com/calculator/gx3e2uhdbr
 		squish_factor = (rate - 1) / math.log(0.5 * (1 - rate))
