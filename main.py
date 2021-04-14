@@ -24,7 +24,7 @@ def main():
 	t_pool = P4Pool(population_size=int(training_config["POPULATION_SIZE"]), name="Debug", restore=False, pool_folder_path=pool_folder_path)
 	@timing
 	def execute_epoch():
-		t_pool.epoch(demo_rate=10, debug=training_config["DEMO_RATE"])
+		t_pool.epoch(demo_rate=training_config["DEMO_RATE"], debug=True)
 
 	for _ in range(training_config["EPOCHS"]):
 		execute_epoch()
