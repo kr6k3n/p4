@@ -1,6 +1,9 @@
-import enum
-from typing import List, Union
 from .learning.simulator import Simulator
+
+from typing import List, Union
+import enum
+
+import numpy as np
 
 class Player(enum.Enum):
   X = "X"
@@ -102,11 +105,11 @@ class P4Simulator(Simulator):
       return True
     return False
 
-  def serialized_state(self, player_id) -> List[int]:
+  def serialized_state(self, player_id) -> np.ndarray:
     serialized = list()
     for i in range(6):
       for j in range(7):
         val = self.state[i][j] * (1 if player_id == "X" else -1)
         serialized.append(val)
-    return serialized
+    return np.array(serialized)
   

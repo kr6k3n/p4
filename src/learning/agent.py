@@ -1,6 +1,9 @@
-from .neural_net import Neural_Network
+from .neural_net import Neural_Network, Network_Description
 from .simulator import Simulator
-from typing import List, Callable, Type, Optional
+
+
+from typing import Type, Optional
+import numpy as np
 
 import time
 
@@ -11,13 +14,13 @@ class Agent:
   name = "None"
   NN: Optional[Neural_Network]
   def __init__(self,
-               SHAPE:   List[int],
-               activation_function : Callable,
-               sim :  Type[Simulator],
-               init_NN: bool=True,
-               id:      int = None):
+               description : Network_Description,
+               sim         : Type[Simulator],
+               init_NN     : bool=True,
+               id          : int = None):
+
     if init_NN:
-      self.NN = Neural_Network(SHAPE, activation_function)
+      self.NN = Neural_Network(description=description)
     else:
       self.NN = None
     if not id is None:
@@ -30,9 +33,10 @@ class Agent:
   def reset(self):
     self.score = 0
   
-  def get_action(self, input_vec) -> int:
+  def get_action(self, input_vec : np.ndarray) -> int:
     nn_output = self.NN.eval_forward(input_vec)
-    return nn_output.index(max(nn_output))
+    # print(int(np.argmax(nn_output)), np.argmax(nn_output))
+    return int(np.argmax(nn_output))
 
   def act(self) -> bool:
     current_state = self.sim_instance.serialized_state(self.player_id)

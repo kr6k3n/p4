@@ -1,10 +1,9 @@
-import math
-
-def ReLu(x: float) -> float:
-	if (x > 0):
-		return x
-	return 0
+import numpy as np
 
 
-def Sigmoid(x: float) -> float:
-  return math.pow(math.exp(-x) + 1 , -1)
+def Sigmoid(vec: np.ndarray) -> np.ndarray:
+    return 1/(1+np.exp(-vec))
+
+
+def ReLu(vec: np.ndarray) -> np.ndarray:
+    return np.maximum(0, vec)

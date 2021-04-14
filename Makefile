@@ -1,2 +1,4 @@
 all:
-	pypy3 main.py
+	python main.py
+time:
+	python -m cProfile -s time main.py

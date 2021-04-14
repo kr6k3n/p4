@@ -1,4 +1,5 @@
 from typing import List, Any
+import numpy as np
 from abc import abstractclassmethod, abstractproperty, ABC
 
 class Simulator(ABC):
@@ -9,5 +10,5 @@ class Simulator(ABC):
     """returns True if next turn can be played"""
     pass
   @abstractclassmethod
-  def serialized_state(self, player_id) -> List[int]: # type: ignore
+  def serialized_state(self, player_id) -> np.ndarray: # type: ignore
     pass

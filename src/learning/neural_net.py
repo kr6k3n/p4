@@ -1,30 +1,34 @@
-from typing import Callable, List
-#from numba import jitclass
-from .connection_layer import Connection
+from typing import Dict, List, Tuple
+import numpy as np
+from dataclasses import dataclass, field
+from .connection_layer import Connection_Layer, Activation_Function
 
 
+Network_Description = List[Tuple[int, Activation_Function]]
+
+@dataclass
 class Neural_Network:
-	def __init__(self, shape: List[int], activation_function : Callable) -> None:
-		self.shape = shape
-		self.activation_function = activation_function
-		self.layer_connections: List[Connection] = []
-		for i in range(len(shape[:-1])):
-			left_side, right_side = shape[i], shape[i+1] 
-			connection = Connection(left_side, right_side)
-			connection.random_init()
-			self.layer_connections.append(connection)
-
-	def eval_forward(self, input_vec : List[float])-> List[float]:
-		result = input_vec
-		for i in range(len(self.shape)-1):
-			result = self.layer_connections[i].eval_forward(result, activation_function=self.activation_function)
-		return result
-
-	def __repr__(self):
-		return "Neural net:" + str(self.shape)
-
-
-	def mutate(self, rate : float) -> None:
-		for layer in self.layer_connections:
-			layer.mutate(rate)
+	description: Network_Description
+	layers: List[Connection_Layer] = field(init=False)
 	
+	def __repr__(self):
+		return "Neural net:" + str(self.description)
+
+	def __post_init__(self):
+		self.layers = list()
+		for i in range(len(self.description)-1):
+			left_side, right_side = self.description[i][0], self.description[i+1][0]
+			connection = Connection_Layer(left_side, right_side, self.description[i+1][1])
+			connection.init_data()
+			self.layers.append(connection)
+	
+	def eval_forward(self, input_vec : np.ndarray) -> np.ndarray:
+		out_vec = input_vec
+		for i in range(len(self.layers)):
+			out_vec = self.layers[i].eval_forward(out_vec)
+		return out_vec
+	
+	def mutate(self, rate: float) -> None:
+		for layer in self.layers:
+			layer.mutate(rate)
+
