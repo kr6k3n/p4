@@ -5,6 +5,8 @@ from functools import wraps
 from time import time
 
 
+from config import training_config
+
 def timing(f):
     @wraps(f)
     def wrap(*args, **kw):
@@ -19,19 +21,15 @@ def timing(f):
 def main():
 
 	pool_folder_path = os.getcwd() + "/pool_saves"
-	t_pool = P4Pool(population_size=int(80), name="Debug", restore=False, pool_folder_path=pool_folder_path)
+	t_pool = P4Pool(population_size=int(training_config["POPULATION_SIZE"]), name="Debug", restore=False, pool_folder_path=pool_folder_path)
 	@timing
 	def execute_epoch():
-		t_pool.epoch(demo_rate=10, debug=False)
+		t_pool.epoch(demo_rate=10, debug=training_config["DEMO_RATE"])
 
-	for i in range(10000):
+	for _ in range(training_config["EPOCHS"]):
 		execute_epoch()
 		# if i % 50 == 0:
 	# 	print("saved epoch #", i)
 	# 	t_pool.save(pool_folder_path=pool_folder_path)
 
-if __name__ == '__main__':
-	try:
-		main()
-	except:
-		pass
+main()
