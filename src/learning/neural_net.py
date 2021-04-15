@@ -31,9 +31,9 @@ class Neural_Network:
 			out_vec = self.layers[i].eval_forward(out_vec, activation_function=self.description[1])
 		return out_vec
 	
-	def mutate(self, rate: float) -> None:
+	def mutate(self, mutation_force: float) -> None:
 		for layer in self.layers:
-			layer.mutate(rate)
+			layer.mutate(mutation_force)
 
 	def reduce_parameters(self) -> None:
 		for layer in self.layers:
