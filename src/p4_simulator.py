@@ -1,3 +1,4 @@
+from dataclasses import dataclass, field
 from .learning.simulator import Simulator
 
 from typing import List, Union
@@ -10,11 +11,11 @@ class Player(enum.Enum):
   O = "O"
   none = None
 
+@dataclass
 class P4Simulator(Simulator):
-  def __init__(self):
-    self.state : list = [[0]*7 for l in range(6)]
-    self.turn  = "X"
-    self.winner = None
+  state: List[List[int]] = field(default_factory=(lambda: [[0]*7 for _ in range(6)]))
+  turn  = "X"
+  winner = None
 
   def __repr__(self):
     representation = str()
@@ -26,14 +27,14 @@ class P4Simulator(Simulator):
         elif self.state[l][c] == 1:
           representation += "X|"
         else:
-          representation += "O|"
+          representation += "O|" # O est l'état défini par -1
       representation += "\n"
     representation += "\n"
     return representation
 
   @property
   def next_turn(self) -> str:
-    return "X" if self.turn == "O" else "X"
+    return "X" if self.turn == "O" else "O"
 
   def illegal_move(self, c) -> bool:
     return (self.state[5][c] != 0)
@@ -109,7 +110,7 @@ class P4Simulator(Simulator):
     serialized = list()
     for i in range(6):
       for j in range(7):
-        val = self.state[i][j] * (1 if player_id == "X" else -1)
+        val = self.state[i][j] * (1 if player_id == "X" else -1) #inverser les valeurs selon le joueur
         serialized.append(val)
     return np.array(serialized)
   

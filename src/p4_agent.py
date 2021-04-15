@@ -5,16 +5,19 @@ from .p4_simulator import P4Simulator
 
 input_size = 7*6
 
-DESCRIPTION = [
-              (input_size,    None),
-              (input_size//2, ReLu),
-              (input_size//2, ReLu),
-              (input_size//2, ReLu),
-              (input_size//2, ReLu),
-              (input_size//3, ReLu),
-              (input_size//3, ReLu),
-              (7,ReLu)
-            ]
+DESCRIPTION = (
+                [
+                  input_size,
+                  input_size*4,
+                  input_size*3,
+                  input_size*2,
+                  input_size,
+                  input_size,
+                  input_size//2,
+                  7
+                ], 
+                ReLu
+              )
 
 
 class P4Agent(Agent):

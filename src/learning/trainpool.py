@@ -1,8 +1,8 @@
 from .agent import Agent
-from collections import deque
+from dataclasses import dataclass, field
 
 
-from typing import List, Type
+from typing import List, Optional, Type
 
 import random as R
 import statistics
@@ -12,22 +12,18 @@ import tqdm
 import copy
 import os
 
-
+@dataclass
 class TrainPool:
-	def __init__(self, population_size: int, agent : Type[Agent], name : str ="Unnamed", restore=False, pool_folder_path : str = None) -> None:
-		self.name : str = name
-		if restore:
-			try:
-				self.restore_from_disk(pool_folder_path)
-				return
-			except FileNotFoundError:
-				print("Could not restore", self.name, "Training Pool", ": file missing")
-
-		self.population_size: int= population_size
+	population_size: int
+	agent: Type[Agent]
+	name : str
+	population: List[Agent] = field(init=False)
+	epochs : int = 0
+	
+	def __post_init__(self) -> None:
 		print("\n\nCreating", self.name, "generation")
-		print(f"Creating initial {agent.name} population...")
-		self.population: List[Agent] = [agent() for _ in range(self.population_size)]
-		self.epochs : int = 0
+		print(f"Creating initial {self.agent.name} population...")
+		self.population= [self.agent() for _ in range(self.population_size)]
 	
 	def display_stats(self, debugging=False):
 		scores = list(p.score for p in self.population)
@@ -55,7 +51,7 @@ class TrainPool:
 
 	def show_game_from_best(self) -> None:
 		print(self.name, "pool, epoch #", self.epochs)
-		print("good player vs good player")
+		print("\nDEMO\ngood player vs good player")
 		p1, p2 = self.population[0], self.population[1]
 		p1.play_against_other(p2, debug_game=True)
 		print("good player vs bad player")
@@ -66,13 +62,13 @@ class TrainPool:
 		for i in range(len(self.population)):
 			self.population[i].reset()
 	
-		if debug: print(f"\n\n{self.name}: epoch {self.epochs+1}")
+		print(f"\n{self.name}: epoch {self.epochs+1}")
 	
 		self.compete(debug=debug)
 		self.population.sort(key= lambda ag: ag.score, reverse=True)
 		self.display_stats(debugging=debug)
 
-		if self.epochs % demo_rate == 0 and self.epochs != 0:
+		if (self.epochs+1) % demo_rate == 0 and self.epochs != 0:
 			self.show_game_from_best()
 			print('nn output sample')
 			p = self.population[0]
@@ -101,26 +97,30 @@ class TrainPool:
 		R.shuffle(self.population)
 		self.epochs += 1
 		
-	def save(self, pool_folder_path: str) -> None:
-		pool_path = pool_folder_path + "/" + self.name
-		try:
-			os.mkdir(pool_path)
-		except FileExistsError:
-			pass
-		now = datetime.datetime.now()
-		now_path =  f"{pool_path}/epoch {self.epochs} | {now.day}-{now.month}-{now.year} {now.hour}:{now.minute}"
-		latest_path = f"{pool_path}/latest"
-		now_file = open(now_path, "wb")
-		latest_file = open(latest_path, "wb")
-		pickle.dump(self, now_file)
-		pickle.dump(self, latest_file)
-		now_file.close()
-		latest_file.close()
+def save_pool_to_disk(t_pool: TrainPool, pool_folder_path: str) -> None:
+	pool_path = pool_folder_path + "/" + t_pool.name
+	try:
+		os.mkdir(pool_path)
+	except FileExistsError:
+		pass
+	now = datetime.datetime.now()
+	now_path =  f"{pool_path}/epoch {t_pool.epochs} | {now.day}-{now.month}-{now.year} {now.hour}:{now.minute}"
+	latest_path = f"{pool_path}/latest"
+	now_file = open(now_path, "wb")
+	latest_file = open(latest_path, "wb")
+	pickle.dump(t_pool, now_file)
+	pickle.dump(t_pool, latest_file)
+	now_file.close()
+	latest_file.close()
 
 
-	def restore_from_disk(self, pool_folder_path):
-		pool_path = pool_folder_path + "/" + self.name
-		latest_path = f"{pool_path}/latest"
+def restore_pool_from_disk(name, pool_folder_path) -> Optional[TrainPool]:
+	pool_path = pool_folder_path + "/" + name
+	latest_path = f"{pool_path}/latest"
+	try:
 		latest_file = open(latest_path, "rb")
-		self = pickle.load(latest_file)
-		latest_file.close()
+	except OSError:
+		return None
+	pool = pickle.load(latest_file)
+	latest_file.close()
+	return pool 
