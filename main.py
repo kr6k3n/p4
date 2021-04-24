@@ -18,7 +18,7 @@ def timing(f):
     return wrap
 
 
-def main():
+def mainloop(training_config):
 
 	t_pool = restore_pool_from_disk(name=training_config["POOL_NAME"],
 																	pool_folder_path=training_config["FOLDER_PATH"])
@@ -28,12 +28,16 @@ def main():
 	@timing
 	def execute_epoch():
 		t_pool.epoch(demo_rate=training_config["DEMO_RATE"], debug=False)
+	try:
+		for epoch in range(t_pool.epochs ,training_config["EPOCHS"]):
+			execute_epoch()
+			if epoch % training_config["REDUCE_RATE"] == 0:
+				for agent in t_pool.population:
+					agent.NN.reduce_parameters()
+			if epoch % training_config["SAVE_RATE"] == 0 :
+				save_pool_to_disk(t_pool=t_pool, pool_folder_path=training_config["FOLDER_PATH"])
+	
+	except KeyboardInterrupt:
+		save_pool_to_disk(t_pool=t_pool, pool_folder_path=training_config["FOLDER_PATH"])
 
-	for epoch in range(training_config["EPOCHS"]):
-		execute_epoch()
-		if epoch % training_config["REDUCE_RATE"] == 0:
-			for agent in t_pool.population:
-				agent.NN.reduce_parameters()
-		if epoch % training_config["SAVE_RATE"] == 0 :
-			save_pool_to_disk(t_pool=t_pool, pool_folder_path=training_config["FOLDER_PATH"])
-main()
+mainloop(training_config=training_config)

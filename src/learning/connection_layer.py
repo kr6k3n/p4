@@ -12,8 +12,8 @@ class Connection_Layer:
   bias_vector         : np.ndarray = field(init=False)
 
   def init_data(self) -> None:
-    self.weight_matrix = np.random.normal(size=(self.output_size, self.input_size))
-    self.bias_vector   = np.random.normal(size=self.output_size)
+    self.weight_matrix = np.random.normal(size=(self.output_size, self.input_size)) * 1E-2
+    self.bias_vector   = np.random.normal(size=self.output_size) * 1E-2
 
   def eval_forward(self, input_vec : np.ndarray, activation_function: Activation_Function) -> np.ndarray:
     neurons = self.weight_matrix.dot(input_vec) + self.bias_vector

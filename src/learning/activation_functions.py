@@ -6,4 +6,6 @@ def Sigmoid(vec: np.ndarray) -> np.ndarray:
 
 
 def ReLu(vec: np.ndarray) -> np.ndarray:
-    return np.maximum(0, vec)
+    res = vec
+    res[res<0] = 0
+    return res

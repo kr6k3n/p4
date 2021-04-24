@@ -1,0 +1,3 @@
+
+
+def minimax(board)

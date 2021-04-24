@@ -7,5 +7,5 @@ training_config = {
   "FOLDER_PATH": os.getcwd() + "/pool_saves",
   "SAVE_RATE" : 100,
   "REDUCE_RATE": 100,
-  "POOL_NAME": "Test"
+  "POOL_NAME": "Test 3"
 }

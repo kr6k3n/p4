@@ -8,12 +8,12 @@ input_size = 7*6
 DESCRIPTION = (
                 [
                   input_size,
+                  input_size*8,
+                  input_size*8,
+                  input_size*8,
                   input_size*4,
-                  input_size*3,
                   input_size*2,
                   input_size,
-                  input_size,
-                  input_size//2,
                   7
                 ], 
                 ReLu
